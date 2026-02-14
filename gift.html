@@ -15,13 +15,14 @@
             align-items: center;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
-            cursor: pointer; /* Indicates clickable */
-            user-select: none; /* Prevents highlighting text while clicking */
+            cursor: pointer;
+            user-select: none;
             
-            /* The Animated Sky Background */
+            /* Animated Sky Background */
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
+            position: relative; /* Needed for absolute positioning of clouds */
         }
 
         @keyframes gradientBG {
@@ -30,7 +31,79 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Glassmorphism card effect for the content */
+        /* --- THE SUN --- */
+        .sun {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ffeb3b, 0 0 80px #ff9800;
+            animation: sunPulse 4s infinite alternate;
+            z-index: 1; /* Behind the card */
+        }
+
+        @keyframes sunPulse {
+            0% { transform: scale(1); box-shadow: 0 0 40px #ffeb3b; }
+            100% { transform: scale(1.1); box-shadow: 0 0 60px #ffeb3b, 0 0 100px #ff9800; }
+        }
+
+        /* --- THE CLOUDS --- */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            z-index: 2; /* Behind the card, in front of sun */
+            animation: float linear infinite;
+        }
+
+        /* Create the fluffy top parts of the cloud using CSS pseudo-elements */
+        .cloud::after, .cloud::before {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        /* Animation to move clouds across screen */
+        @keyframes float {
+            from { transform: translateX(-200px); }
+            to { transform: translateX(110vw); }
+        }
+
+        /* Cloud Variations */
+        .c1 {
+            width: 120px; height: 40px;
+            top: 20%; left: -120px;
+            animation-duration: 25s;
+        }
+        .c1::after { width: 50px; height: 50px; top: -25px; left: 20px; }
+        .c1::before { width: 40px; height: 40px; top: -15px; right: 20px; }
+
+        .c2 {
+            width: 160px; height: 50px;
+            top: 40%; left: -160px;
+            animation-duration: 35s;
+            animation-delay: 5s; /* Starts later */
+            opacity: 0.6;
+        }
+        .c2::after { width: 70px; height: 70px; top: -35px; left: 25px; }
+        .c2::before { width: 60px; height: 60px; top: -25px; right: 25px; }
+
+        .c3 {
+            width: 100px; height: 35px;
+            top: 15%; left: -100px;
+            animation-duration: 18s;
+            animation-delay: 2s;
+            opacity: 0.7;
+        }
+        .c3::after { width: 45px; height: 45px; top: -20px; left: 15px; }
+        .c3::before { width: 35px; height: 35px; top: -15px; right: 15px; }
+
+
+        /* --- CONTENT CARD --- */
         #content-container {
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
@@ -46,6 +119,8 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            position: relative;
+            z-index: 10; /* Ensures this is on top of clouds */
         }
 
         h1 {
@@ -74,6 +149,7 @@
             color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
             animation: bounce 2s infinite;
+            z-index: 10;
         }
 
         @keyframes bounce {
@@ -85,6 +161,11 @@
 </head>
 <body>
 
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+
     <div id="content-container">
         </div>
 
@@ -94,11 +175,13 @@
         // CONFIGURATION: Add your texts and image filenames here
         const slides = [
             { type: 'text', content: "Our love... is as big as the sky." },
+            { type: 'text', content: "... as big as the sky." },
             { type: 'text', content: "Every time I look at you, I smile." },
-            { type: 'image', content: "us1.jpg" }, // Replace with your image filename
+            // Remember to upload 'us1.jpg' to your github folder if you use this!
+            // { type: 'image', content: "us1.jpg" }, 
             { type: 'text', content: "You make the bad days better..." },
             { type: 'text', content: "...and the good days amazing." },
-            { type: 'image', content: "us2.jpg" }, // Replace with your image filename
+            // { type: 'image', content: "us2.jpg" }, 
             { type: 'text', content: "I love you more than words can say." },
             { type: 'text', content: "Happy Valentine's Day! ❤️" }
         ];
@@ -108,20 +191,14 @@
         const hint = document.getElementById('hint-text');
 
         function showSlide(index) {
-            // Fade out
             container.style.opacity = '0';
-
             setTimeout(() => {
-                // Update content
-                container.innerHTML = ''; // Clear current content
+                container.innerHTML = ''; 
                 
                 if (index >= slides.length) {
-                    // Loop back to start or stay at end? Let's stay at end for now.
-                    // Or you can restart: currentIndex = 0;
                     container.innerHTML = `<h1>I love you! ❤️</h1>`;
                 } else {
                     const slide = slides[index];
-
                     if (slide.type === 'text') {
                         const textElement = document.createElement('h1');
                         textElement.innerText = slide.content;
@@ -129,26 +206,20 @@
                     } else if (slide.type === 'image') {
                         const imgElement = document.createElement('img');
                         imgElement.src = slide.content;
-                        imgElement.alt = "Our memory";
                         container.appendChild(imgElement);
                     }
                 }
-
-                // Fade in
                 container.style.opacity = '1';
-            }, 500); // Wait 0.5s for fade out before changing
+            }, 500);
         }
 
-        // Initialize first slide
         showSlide(currentIndex);
 
-        // Handle clicks
         document.body.addEventListener('click', () => {
             if (currentIndex < slides.length) {
                 currentIndex++;
                 showSlide(currentIndex);
             }
-            // Hide the hint after the first click
             if (hint) hint.style.display = 'none';
         });
     </script>
